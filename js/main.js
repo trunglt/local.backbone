@@ -1,85 +1,136 @@
-(function(){
+(function() {
 
 window.App = {
-    Models: {},
-    Collections: {},
-    Views: {}
+	Models: {},
+	Collections: {},
+	Views: {},
+	Router: {}
 };
 
-window.template = function(id){
-    return _.template( $('#' + id).html());
+window.template = function(id) {
+	return _.template( $('#' + id).html() );
 };
 
+// Router
+App.Router = Backbone.Router.extend({
+	routers: {
+		'': 'index'
+	},
+	index: function(){
+		$(document.boy).append('Index route has been called');
+	}
+});
 
+// Person Model
 App.Models.Person = Backbone.Model.extend({
 	defaults: {
-		title: 'developer',
-		age: 29,
-		name: 'trunglt'
-	},
-    setTitle: function(newTitle) {
-        this.set({ title: newTitle });
-    },
-    setLocation: function(newLoc) {
-        this.set({ location: newLoc });
-    }
+		name: 'Guest User',
+		age: 30,
+		occupation: 'worker'
+	}
 });
 
-App.Views.Person = Backbone.View.extend({
-    //el: $('#viewtemplate'),
-    tagName: 'li',
-    template: _.template($('#personTemplate').html()),
-    /*
-    initialize: function() {
-    	this.template = _.template($('#personTemplate').html());
-        _.bindAll(this, 'render');
-        this.model.on('change:title', this.render);
-    },
-    */
-    render: function(event) {
-        this.$el.html(
-           this.template(this.model.toJSON())
-        );
-        return this;
-    }
-});
-
+// A List of People
 App.Collections.People = Backbone.Collection.extend({
 	model: App.Models.Person
 });
 
+
+// View for all people
 App.Views.People = Backbone.View.extend({
 	tagName: 'ul',
+	
+	initialize: function() {
+		this.collection.on('add', this.addOne, this);
+	},
+	
+	render: function() {
+		this.collection.each(this.addOne, this);
 
-	render: function(){
-		this.collection.each(function(person){
-			var personView = new App.Views.Person({model: person});
-			this.$el.append(personView.render().el); // call render method manually
-		}, this);
-		return this; // return this for chaining
+		return this;
+	},
+
+	addOne: function(person) {
+		var personView = new App.Views.Person({ model: person });
+		this.$el.append(personView.render().el);
 	}
 });
 
-//Change here for Person Reference from App Collections namespace
+// The View for a Person
+App.Views.Person = Backbone.View.extend({
+	tagName: 'li',
+
+	template: template('personTemplate'),	
+	
+	initialize: function(){
+		this.model.on('change', this.render, this);
+		this.model.on('destroy', this.remove, this);
+	},
+	
+	events: {
+	 'click .edit' : 'editPerson',
+	 'click .delete' : 'DestroyPerson'	
+	},
+	
+	editPerson: function(){
+		var newName = prompt("Please enter the new name", this.model.get('name'));
+		if (!newName) return;
+		this.model.set('name', newName);
+	},
+	
+	DestroyPerson: function(){
+		this.model.destroy();
+	},
+	
+	remove: function(){
+		this.$el.remove();
+	},
+	
+	render: function() {
+		this.$el.html( this.template(this.model.toJSON()) );
+		return this;
+	}
+});
+
+
+App.Views.AddPerson = Backbone.View.extend({
+	el: '#addPerson',
+
+	events: {
+		'submit': 'submit'
+	},
+
+	submit: function(e) {
+		e.preventDefault();
+		var newPersonName = $(e.currentTarget).find('input[type=text]').val();
+		var person = new App.Models.Person({ name: newPersonName });
+		this.collection.add(person);
+
+	}
+});
+
+
+// start
+new App.Router;
+Backbone.history.start();
+
 var peopleCollection = new App.Collections.People([
-    {
-        name: 'Mohit Jain',
-        age: 26
-    },
-    {
-        name: 'Taroon Tyagi',
-        age: 25,
-        occupation: 'web designer'
-    },
-    {
-        name: 'Rahul Narang',
-        age: 26,
-        occupation: 'Java Developer'
-    }
+	{
+		name: 'Mohit Jain',
+		age: 26
+	},
+	{
+		name: 'Taroon Tyagi',
+		age: 25,
+		occupation: 'web designer'
+	},
+	{
+		name: 'Rahul Narang',
+		age: 26,
+		occupation: 'Java Developer'
+	}
 ]);
-
-// Change here for Person Views from App Views namespace
-var peopleView = new App.Views.People({ collection: peopleCollection });
+var addPersonView = new App.Views.AddPerson({ collection: peopleCollection });
+peopleView = new App.Views.People({ collection: peopleCollection });
 $(document.body).append(peopleView.render().el);
-
 })();

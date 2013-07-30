@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="ISO-8859-1">
-	<title>Insert title here</title>
-	<script src='js/underscore.js'></script>
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-	<script src='js/backbone.js'></script>
+	<meta charset="utf-8">
+	<title></title>
 </head>
 <body>
-<h3>Backbone</h3>
-<script id="personTemplate" type="text/x-underscore-template">
-    <strong><%= name %></strong> (<%= age %>) - <%= title %>
+	<h1>My Friends</h1>	
+	<form id="addPerson" action="">
+			<input type="text" placeholder="Name of the person">
+			<input type="submit" value="Add Person">
+	</form>
+<script id="personTemplate" type="text/template">
+	<span><strong><%= name %></strong> (<%= age %>) - <%= occupation %></span> 
+	<button class="edit">Edit</button>
+	<button class="delete">Delete</button>
 </script>
-<div>Content:</div>
-<div id='viewtemplate'>Insert here</div>
-<script src='js/main.js'></script>
 
+<script src="js/underscore.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="js/backbone.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
